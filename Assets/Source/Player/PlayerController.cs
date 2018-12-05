@@ -30,6 +30,7 @@ public class PlayerController : MonoBehaviour
         movementComp.RequestMoveForward(Input.GetAxis("Vertical"));
         movementComp.RequestMoveRight(Input.GetAxis("Horizontal"));
         if (Input.GetButton("Jump")) { movementComp.RequestJump(); }
+        if (Input.GetButton("Slide")) { movementComp.RequestSlide(); }
         movementComp.RequestSwitchWall(Input.GetAxis("SwitchWall"));
 
 

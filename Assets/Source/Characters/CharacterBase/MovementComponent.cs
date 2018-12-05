@@ -6,24 +6,30 @@ public enum MovementState
 {
     Grounding,
     Jumping,
+    Sliding,
     Switching,
 };
 
 [RequireComponent(typeof(CharacterController))]
 public class MovementComponent : MonoBehaviour
 {
-    public float gravity = 10;
-    public float walkSpeed = 5;
-    public float sideWalkSpeed = 2;
-    public float jumpHeight = 1;
-    public float airControlVertical = 1;
-    public float airControlHorizontal = .5f;
+    public const float gravity = 10;
+    public const float walkSpeed = 5;
+    public const float sideWalkSpeed = 2;
+    public const float jumpHeight = 1;
+    public const float airControlVertical = 1;
+    public const float airControlHorizontal = .5f;
+    public const float slideTime = 1;
+    public const float slideControlVertical = 1;
+    public const float slideControlHorizontal = .2f;
 
+    // TODO replace with real animation
+    public Vector3 slideTransform = new Vector3(0, -.8f, 0);
 
     private Vector3 velocity = Vector3.zero;
-    private bool shouldJump;
-    private float verticleAxisValue, honrizontalAxisValue, switchAxisValue;
-
+    private bool shouldJump = false, shouldSlide = false;
+    private float verticleAxisValue, horizontalAxisValue, switchAxisValue;
+    private float slideTimer = 0;
 
     private CharacterController characterController;
     private MovementState state = MovementState.Jumping;
@@ -42,18 +48,35 @@ public class MovementComponent : MonoBehaviour
         {
             case MovementState.Grounding:
                 MoveForward(verticleAxisValue);
-                MoveRight(honrizontalAxisValue);
+                MoveRight(horizontalAxisValue);
                 if (shouldJump)
                 {
                     Jump();
                     state = MovementState.Jumping;
                 }
+                else if (shouldSlide)
+                {
+                    Slide();
+                    state = MovementState.Sliding;
+                }
                 break;
             case MovementState.Jumping:
-                shouldJump = false;
+                ClearShould();
                 MoveForward(airControlVertical * verticleAxisValue);
-                MoveRight(airControlHorizontal * honrizontalAxisValue);
+                MoveRight(airControlHorizontal * horizontalAxisValue);
                 if (characterController.isGrounded) { state = MovementState.Grounding; }
+                break;
+            case MovementState.Sliding:
+                ClearShould();
+                slideTimer += Time.deltaTime;
+                MoveForward(slideControlVertical * verticleAxisValue);
+                MoveRight(slideControlHorizontal * horizontalAxisValue);
+                if(slideTimer > slideTime)
+                {
+                    StopSliding();
+                    slideTimer = 0;
+                    state = MovementState.Grounding;
+                }
                 break;
             case MovementState.Switching:
 
@@ -65,11 +88,19 @@ public class MovementComponent : MonoBehaviour
 
     public void RequestMoveForward(float axisValue) { verticleAxisValue = axisValue; }
 
-    public void RequestMoveRight(float axisValue) { honrizontalAxisValue = axisValue; }
+    public void RequestMoveRight(float axisValue) { horizontalAxisValue = axisValue; }
 
     public void RequestJump() { shouldJump = true; }
 
+    public void RequestSlide() { shouldSlide = true; }
+
     public void RequestSwitchWall(float axisValue) { switchAxisValue = axisValue; }
+
+    public void ClearShould()
+    {
+        shouldJump = false;
+        shouldSlide = false;
+    }
 
     private void MoveForward(float axisValue) { velocity.z = axisValue * walkSpeed; }
 
@@ -80,6 +111,10 @@ public class MovementComponent : MonoBehaviour
     private void Fall() { velocity.y -= gravity * Time.deltaTime; }
 
     private void StopFalling() { velocity.y = 0; }
+
+    private void Slide() { transform.localScale += slideTransform; }
+
+    private void StopSliding() { transform.localScale -= slideTransform; }
 
     private void SwitchLane()
     {
