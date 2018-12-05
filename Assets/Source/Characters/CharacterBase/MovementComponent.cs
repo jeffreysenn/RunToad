@@ -13,17 +13,18 @@ public enum MovementState
 [RequireComponent(typeof(CharacterController))]
 public class MovementComponent : MonoBehaviour
 {
-    public const float gravity = 10;
-    public const float walkSpeed = 5;
-    public const float sideWalkSpeed = 2;
-    public const float jumpHeight = 1;
-    public const float airControlVertical = 1;
-    public const float airControlHorizontal = .5f;
-    public const float slideTime = 1;
-    public const float slideControlVertical = 1;
-    public const float slideControlHorizontal = .2f;
+    public float gravity = 10;
+    public float walkSpeed = 5;
+    public float sideWalkSpeed = 2;
+    public float jumpHeight = 1;
+    public float airControlVertical = 1;
+    public float airControlHorizontal = .5f;
+    public float slideTime = 1;
+    public float slideControlVertical = 1;
+    public float slideControlHorizontal = .2f;
+    public float switchAccepetanceRange = 2;
 
-    // TODO replace with real animation
+    // TODO replace with animation
     public Vector3 slideTransform = new Vector3(0, -.8f, 0);
 
     private Vector3 velocity = Vector3.zero;
@@ -59,6 +60,10 @@ public class MovementComponent : MonoBehaviour
                     Slide();
                     state = MovementState.Sliding;
                 }
+                else if (switchAxisValue != 0)
+                {
+                    state = MovementState.Switching;
+                }
                 break;
             case MovementState.Jumping:
                 ClearShould();
@@ -79,7 +84,8 @@ public class MovementComponent : MonoBehaviour
                 }
                 break;
             case MovementState.Switching:
-
+                ClearShould();
+                SwitchWall(switchAxisValue);
                 break;
             default:
                 break;
@@ -116,8 +122,16 @@ public class MovementComponent : MonoBehaviour
 
     private void StopSliding() { transform.localScale -= slideTransform; }
 
-    private void SwitchLane()
+    private void SwitchWall(float axisValue)
     {
-
+        RaycastHit outHit;
+        // TODO Add layer mask
+        Physics.Raycast(transform.position/* - new Vector3(0, characterController.height/2, 0)*/, axisValue * transform.right, out outHit, 20);
+        Debug.Log(outHit.point);
+        MoveRight(axisValue);
+        if(Vector3.Distance(transform.position, outHit.point) < switchAccepetanceRange)
+        {
+            transform.rotation = outHit.transform.rotation;
+        }
     }
 }
