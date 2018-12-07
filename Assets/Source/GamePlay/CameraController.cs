@@ -18,8 +18,8 @@ public class CameraController : MonoBehaviour {
 	void LateUpdate ()
     {
         transform.LookAt(playerObj.transform);
-        //transform.rotation = playerObj.transform.rotation;
-        Vector3 targetPosition = playerObj.transform.position + offset;
+        transform.rotation = playerObj.transform.rotation;
+        Vector3 targetPosition = playerObj.transform.TransformPoint(offset);
         transform.position = Vector3.SmoothDamp(transform.position, targetPosition, ref velocity, smoothTime);
     }
 }
