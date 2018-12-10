@@ -11,8 +11,11 @@ public enum MovementState
 };
 
 [RequireComponent(typeof(CapsuleCollider))]
+[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(SpeedZController))]
 public class MovementComponent : MonoBehaviour
 {
+    [Header("Movement")]
     public float gravity = 10;
     public float walkSpeedZ = 15;
     public float walkSpeedX = 2;
@@ -28,6 +31,10 @@ public class MovementComponent : MonoBehaviour
     public float switchRotateSpeed = 90;
     public float switchRotateAcceptanceRange = .0001f;
 
+    [Header("Auto Run")]
+    public bool autoRun = false;
+
+    [Header("Advance")]
     public float groundCheckExtraRadius = -.01f;
     public float groundCheckOvershoot = .01f;
     public int collisionBuffer = 5;
@@ -128,7 +135,9 @@ public class MovementComponent : MonoBehaviour
     }
 
 
-    public void RequestMoveForward(float axisValue) { movementAxisZ = axisValue; }
+    public void RequestMoveForward(float axisValue) { if (!autoRun) { movementAxisZ = axisValue; } }
+
+    public void RequestMoveForwardAuto(float axisValue) { if (autoRun) { movementAxisZ = axisValue; } }
 
     public void RequestMoveRight(float axisValue) { movementAxisX = axisValue; }
 
@@ -197,6 +206,7 @@ public class MovementComponent : MonoBehaviour
         else
         {
             StopFalling();
+
             ClampToGround(outGround);
         }
     }
