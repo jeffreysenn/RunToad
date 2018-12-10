@@ -34,7 +34,8 @@ public class MovementComponent : MonoBehaviour
     [Header("Auto Run")]
     public bool autoRun = false;
 
-    [Header("Advance")]
+
+    [Header("Advanced")]
     public float groundCheckExtraRadius = -.01f;
     public float groundCheckOvershoot = .01f;
     public int collisionBuffer = 5;
@@ -122,7 +123,7 @@ public class MovementComponent : MonoBehaviour
                     Rotate();
                     if (Mathf.Abs(1 - Vector3.Dot(transform.up, WallToSwitch.normal)) < switchRotateAcceptanceRange)
                     {
-                        transform.rotation = WallToSwitch.transform.rotation;
+                        // TODO find a proper way to clamp
                         shouldRotate = false;
                         switchAxis = 0;
                         state = MovementState.Grounding;
@@ -169,23 +170,11 @@ public class MovementComponent : MonoBehaviour
 
     private void StopSliding() { transform.localScale -= slideTransform; }
 
-    private void SwitchWall(float axisValue)
-    {
-        velocity.x = axisValue * switchWallSpeedX;
-    }
+    private void SwitchWall(float axisValue) { velocity.x = axisValue * switchWallSpeedX; }
 
-    private bool CheckWall(out RaycastHit wall)
-    {
-        // TODO Add layer mask
-        return Physics.Raycast(transform.position, switchAxis * transform.right, out wall, Mathf.Infinity);
+    private bool CheckWall(out RaycastHit wall) { return Physics.Raycast(transform.position, switchAxis * transform.right, out wall, Mathf.Infinity, LayerMask.GetMask("Floor")); }
 
-    }
-
-    private void Rotate()
-    {
-        transform.RotateAround(transform.TransformPoint(Vector3.down * GetCapsuleCylinderHalfHeight()), switchAxis*transform.forward, Time.deltaTime * switchRotateSpeed);
-
-    }
+    private void Rotate() { transform.RotateAround(transform.TransformPoint(Vector3.down * GetCapsuleCylinderHalfHeight()), switchAxis * transform.forward, Time.deltaTime * switchRotateSpeed); }
 
     private void Move()
     {

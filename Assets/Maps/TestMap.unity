@@ -455,7 +455,7 @@ GameObject:
   - component: {fileID: 475054589}
   - component: {fileID: 475054588}
   - component: {fileID: 475054587}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Plane (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -636,7 +636,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 636429878}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: GameObject (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -918,7 +918,7 @@ GameObject:
   - component: {fileID: 811028895}
   - component: {fileID: 811028894}
   - component: {fileID: 811028893}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Plane (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1050,7 +1050,7 @@ GameObject:
   - component: {fileID: 1094484239}
   - component: {fileID: 1094484238}
   - component: {fileID: 1094484237}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Plane (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1255,8 +1255,11 @@ MonoBehaviour:
   switchWallControlZ: 1
   switchAccepetanceRange: 1
   switchRotateSpeed: 90
-  switchRotateAcceptanceRange: 0.0001
+  switchRotateAcceptanceRange: 0.001
   autoRun: 1
+  floorLayer:
+    serializedVersion: 2
+    m_Bits: 256
   groundCheckExtraRadius: -0.01
   groundCheckOvershoot: 0.01
   collisionBuffer: 5
@@ -1486,7 +1489,7 @@ GameObject:
   - component: {fileID: 1474972951}
   - component: {fileID: 1474972950}
   - component: {fileID: 1474972949}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Plane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1573,7 +1576,7 @@ GameObject:
   - component: {fileID: 1513324126}
   - component: {fileID: 1513324125}
   - component: {fileID: 1513324124}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Plane (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1660,7 +1663,7 @@ GameObject:
   - component: {fileID: 1543095451}
   - component: {fileID: 1543095450}
   - component: {fileID: 1543095449}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Plane (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
