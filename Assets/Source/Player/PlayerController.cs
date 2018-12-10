@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 using UnityEngine;
 
 
@@ -33,6 +34,7 @@ public class PlayerController : MonoBehaviour
         if (Input.GetButton("Slide")) { movementComp.RequestSlide(); }
         movementComp.RequestSwitchWall(Input.GetAxis("SwitchWall"));
 
+        if (Input.GetButton("Restart")) { SceneManager.LoadScene(SceneManager.GetActiveScene().name); }
 
     }
 

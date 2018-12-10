@@ -20,21 +20,35 @@ public class LevelDestroyer : MonoBehaviour {
         transform.position = mainCamera.transform.position - transform.forward * ((GetComponent<BoxCollider>().size.z/2) + destroyDistanceBehind);
 	}
 
-    private void OnTriggerStay(Collider other)
+    private void OnTriggerEnter(Collider other)
     {
 
         Vector3 selfCentre = transform.position;
-        float selfLength = transform.localScale.z * GetComponent<BoxCollider>().size.z / 2;
+        float selfHalfLength = transform.localScale.z * GetComponent<BoxCollider>().size.z / 2;
+        Vector3 otherCentre = Vector3.zero;
+        float otherHalfLength = 0;
 
-        Vector3 otherCentre = other.gameObject.GetComponent<Renderer>().bounds.center;
-        float otherLength = other.gameObject.GetComponent<Renderer>().bounds.extents.magnitude ;
+        if (other.gameObject.GetComponent<BoxCollider>() != null)
+        {
+            otherCentre = transform.TransformPoint(other.gameObject.GetComponent<BoxCollider>().center);
+            otherHalfLength = other.gameObject.GetComponent<BoxCollider>().size.z * other.gameObject.transform.localScale.z;
+        }
+        else if (other.gameObject.GetComponent<Renderer>() != null)
+        {
+            otherCentre = other.gameObject.GetComponent<Renderer>().bounds.center;
+            otherHalfLength = other.gameObject.GetComponent<Renderer>().bounds.extents.magnitude;
+        }
+        else
+        {
+            return;
+        }
 
-        if (GetFrontCentrePosition(selfCentre, selfLength).z > GetFrontCentrePosition(otherCentre, otherLength).z) { Destroy(other.gameObject); }
+        if (GetFrontCentrePosition(selfCentre, selfHalfLength).z > GetFrontCentrePosition(otherCentre, otherHalfLength).z) { Destroy(other.gameObject); }
     }
 
-    private Vector3 GetFrontCentrePosition(Vector3 centrePosition, float length)
+    private Vector3 GetFrontCentrePosition(Vector3 centrePosition, float halfLength)
     {
-        return centrePosition + transform.forward * length;
+        return centrePosition + transform.forward * halfLength;
     }
 
 }

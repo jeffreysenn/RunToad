@@ -17,8 +17,7 @@ public class LevelContructor : MonoBehaviour {
     public float constructAcceptance = 10;
     public float constructEveryDistance = 3;
 
-    public GameObject floor;
-    public GameObject block;
+    public GameObject floor, block, hole;
 
     public float floorChance = .6f;
     public float holeChance = .2f;
@@ -60,20 +59,29 @@ public class LevelContructor : MonoBehaviour {
         else if (dice < floorChance + holeChance) { constructType = ConstructType.Hole; }
         else if (dice < floorChance + holeChance + blockChance) { constructType = ConstructType.Block; }
         else if (dice < floorChance + holeChance + floatBlockChance) { constructType = ConstructType.FloatBlock; }
-        Debug.Log(constructType);
+        // Debug.Log(constructType);
     }
 
     private void Construct()
     {
-        if(floor == null || block == null) { return; }
         switch (constructType)
         {
             case (ConstructType.Floor):
+                if (floor == null) { break; }
                 ConstructFloor();
                 break;
             case (ConstructType.Block):
+                if(floor == null) { break; }
                 ConstructFloor();
                 // ConstructBlock();
+                break;
+            case (ConstructType.Hole):
+                if (hole == null) { break; }
+                ConstructHole();
+                break;
+            case (ConstructType.FloatBlock):
+                if (floor == null) { break; }
+                ConstructFloor();
                 break;
             default:
                 break;
@@ -101,4 +109,5 @@ public class LevelContructor : MonoBehaviour {
 
     private void ConstructFloor() { GameObject.Instantiate(floor, transform.position, transform.rotation); }
     private void ConstructBlock() { GameObject.Instantiate(block, transform.position + transform.up * blockHeight, transform.rotation); }
+    private void ConstructHole() { GameObject.Instantiate(hole, transform.position, transform.rotation); }
 }

@@ -8,11 +8,13 @@ public enum MovementState
     Jumping,
     Sliding,
     Switching,
+    Frozen
 };
 
 [RequireComponent(typeof(CapsuleCollider))]
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(SpeedZController))]
+
 public class MovementComponent : MonoBehaviour
 {
     [Header("Movement")]
@@ -50,6 +52,7 @@ public class MovementComponent : MonoBehaviour
     private bool shouldRotate = false;
     private RaycastHit WallToSwitch;
     private float slideTimer = 0;
+    private bool shoudFreezeAllMovement = false;
 
 
     private MovementState state = MovementState.Jumping;
@@ -64,6 +67,13 @@ public class MovementComponent : MonoBehaviour
 
     private void ComputeRequestMovement()
     {
+        if (shoudFreezeAllMovement)
+        {
+            velocity = Vector3.zero;
+            state = MovementState.Frozen;
+            shoudFreezeAllMovement = false;
+        }
+
         switch (state)
         {
             case MovementState.Grounding:
@@ -87,13 +97,13 @@ public class MovementComponent : MonoBehaviour
                 }
                 break;
             case MovementState.Jumping:
-                ClearRequests();
+                ClearActionRequests();
                 MoveForward(airControlZ * movementAxisZ);
                 MoveRight(airControlX * movementAxisX);
                 if (IsMovingOnGround()) { state = MovementState.Grounding; }
                 break;
             case MovementState.Sliding:
-                ClearRequests();
+                ClearActionRequests();
                 slideTimer += Time.deltaTime;
                 MoveForward(slideControlZ * movementAxisZ);
                 MoveRight(slideControlX * movementAxisX);
@@ -105,7 +115,7 @@ public class MovementComponent : MonoBehaviour
                 }
                 break;
             case MovementState.Switching:
-                ClearRequests();
+                ClearActionRequests();
                 MoveForward(switchWallControlZ * movementAxisZ);
                 if (!shouldRotate)
                 {
@@ -130,6 +140,11 @@ public class MovementComponent : MonoBehaviour
                     }
                 }
                 break;
+
+            case MovementState.Frozen:
+                ClearAllRequests();
+                break;
+
             default:
                 break;
         }
@@ -148,13 +163,22 @@ public class MovementComponent : MonoBehaviour
 
     public void RequestSwitchWall(float axisValue) { shouldSwitchAxis = axisValue; }
 
-    private void ClearRequests()
+    public void RequestFreezeAllMovement() { shoudFreezeAllMovement = true; }
+
+    private void ClearActionRequests()
     {
         shouldJump = false;
         shouldSlide = false;
         shouldSwitchAxis = 0;
     }
 
+    private void ClearAllRequests()
+    {
+        movementAxisX = 0;
+        movementAxisZ = 0;
+        
+        ClearActionRequests();
+    }
 
     private void MoveForward(float axisValue) { velocity.z = axisValue * walkSpeedZ; }
 
@@ -172,7 +196,7 @@ public class MovementComponent : MonoBehaviour
 
     private void SwitchWall(float axisValue) { velocity.x = axisValue * switchWallSpeedX; }
 
-    private bool CheckWall(out RaycastHit wall) { return Physics.Raycast(transform.position, switchAxis * transform.right, out wall, Mathf.Infinity, LayerMask.GetMask("Floor")); }
+    private bool CheckWall(out RaycastHit wall) { return Physics.Raycast(transform.position, switchAxis * transform.right, out wall, Mathf.Infinity, LayerMask.GetMask("Floor"), QueryTriggerInteraction.Ignore); }
 
     private void Rotate() { transform.RotateAround(transform.TransformPoint(Vector3.down * GetCapsuleCylinderHalfHeight()), switchAxis * transform.forward, Time.deltaTime * switchRotateSpeed); }
 
@@ -203,7 +227,7 @@ public class MovementComponent : MonoBehaviour
     private void HandleCollision()
     {
         Collider[] outOverlappingColliders = new Collider[collisionBuffer + 1];
-        int numOverlappingColliders = Physics.OverlapCapsuleNonAlloc(transform.position + transform.up * GetCapsuleCylinderHalfHeight(), transform.position - transform.up * GetCapsuleCylinderHalfHeight(), GetCapsuleRadius(), outOverlappingColliders);
+        int numOverlappingColliders = Physics.OverlapCapsuleNonAlloc(transform.position + transform.up * GetCapsuleCylinderHalfHeight(), transform.position - transform.up * GetCapsuleCylinderHalfHeight(), GetCapsuleRadius(), outOverlappingColliders, ~0, QueryTriggerInteraction.Ignore);
         for(int i = 0; i < numOverlappingColliders; i++)
         {
             if(outOverlappingColliders[i] == GetComponent<CapsuleCollider>()) { continue; }
@@ -220,13 +244,13 @@ public class MovementComponent : MonoBehaviour
     private bool IsMovingOnGround(out RaycastHit ground)
     {
         Ray ray = new Ray(transform.position + transform.up * (GetCapsuleHalfHeight() - GetGroundCheckRadius()), -transform.up);
-        return Physics.SphereCast(ray, GetGroundCheckRadius(), out ground, 2 * (GetCapsuleHalfHeight() - GetGroundCheckRadius()) + GetGroundCheckOvershoot());
+        return Physics.SphereCast(ray, GetGroundCheckRadius(), out ground, 2 * (GetCapsuleHalfHeight() - GetGroundCheckRadius()) + GetGroundCheckOvershoot(), LayerMask.GetMask("Floor"), QueryTriggerInteraction.Ignore);
     }
 
     private bool IsMovingOnGround()
     {
         Ray ray = new Ray(transform.position + transform.up * (GetCapsuleHalfHeight() - GetGroundCheckRadius()), -transform.up);
-        return Physics.SphereCast(ray, GetGroundCheckRadius(), 2 * (GetCapsuleHalfHeight() - GetGroundCheckRadius()) + GetGroundCheckOvershoot());
+        return Physics.SphereCast(ray, GetGroundCheckRadius(), 2 * (GetCapsuleHalfHeight() - GetGroundCheckRadius()) + GetGroundCheckOvershoot(), LayerMask.GetMask("Floor"), QueryTriggerInteraction.Ignore);
     }
 
     private void ClampToGround(RaycastHit ground) { transform.position = ground.point + ground.normal * GetGroundCheckRadius() + transform.up * (GetCapsuleHalfHeight() - GetGroundCheckRadius()); } 
